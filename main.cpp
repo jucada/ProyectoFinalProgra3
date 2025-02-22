@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <set>
 
 using namespace std;
 
@@ -18,6 +19,7 @@ private:
     int id;
     string titulo;
     string sinopsis;
+    set<string> generos;
 
 public:
     Pelicula(int id, string titulo, string sinopsis) {
@@ -49,13 +51,17 @@ public:
     string getTitulo() const {
         return titulo;
     }
+
+    void agregarGenero(string genero) {
+        generos.insert(genero);
+    }
 };
 
 
 class Genero : public Componente {
 private:
     string nombre;
-    vector<Componente*> peliculas;
+    vector<Pelicula*> peliculas;
 
 public:
     Genero(string nombre) {
@@ -63,7 +69,12 @@ public:
     }
 
     void agregar(Componente* pelicula) override {
-        peliculas.push_back(pelicula);
+        Pelicula* peli = dynamic_cast<Pelicula*>(pelicula);
+        if (peli) {
+            peliculas.push_back(peli);
+        } else {
+            cout<<"Error no es pelicula"<<endl;
+        }
     }
 
     void mostrar() const override {
@@ -126,13 +137,19 @@ private:
         }
 
         int prioridad = 0;
-        if (nodo->pelicula->contienePalabra(palabra)) {
-            if (nodo->pelicula->getTitulo().find(palabra) != string::npos) {
-                prioridad = 1000;
-            } else {
-                prioridad = nodo->pelicula->contarPalabra(palabra);
-            }
-            resultados.push_back({prioridad, nodo->pelicula});
+        int vecesTitulo = 0;
+        int vecesSinopsis = nodo->pelicula->contarPalabra(palabra);
+
+        int pos = nodo->pelicula->getTitulo().find(palabra,0);
+        while (pos != -1) {
+            vecesTitulo++;
+            pos = nodo->pelicula->getTitulo().find(palabra,pos+palabra.length());
+        }
+
+        prioridad = (vecesTitulo * 10) + vecesSinopsis;
+
+        if (prioridad > 0) {
+            resultados.push_back({prioridad,nodo->pelicula});
         }
 
         buscarNodo(nodo->izq, palabra, resultados);
