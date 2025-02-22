@@ -29,7 +29,7 @@ public:
     }
 
     void mostrar() const override {
-        cout << "Título: " << titulo << endl;
+        cout << "Titulo: " << titulo << endl;
         cout << "Sinopsis: " << sinopsis << endl;
         cout << "----------------------------------------------" << endl;
     }
@@ -55,6 +55,8 @@ public:
     void agregarGenero(string genero) {
         generos.insert(genero);
     }
+
+    void agregar(Componente *pelicula) override{};
 };
 
 
@@ -78,7 +80,7 @@ public:
     }
 
     void mostrar() const override {
-        cout << "Género: " << nombre << endl;
+        cout << "Genero: " << nombre << endl;
         cout << "--------------------------------------------" << endl;
         for (const auto& pelicula : peliculas) {
             pelicula->mostrar();
@@ -171,7 +173,7 @@ public:
             return a.first > b.first;
         });
 
-        cout << "Resultados de búsqueda:" << endl;
+        cout << "Resultados de busqueda:" << endl;
         for (const auto& resultado : resultados) {
             resultado.second->mostrar();
         }
@@ -180,6 +182,20 @@ public:
 
 
 int main() {
+    BusquedaArbol arbol;
+    Genero* accion = new Genero("Accion");
+
+    Pelicula* p1 = new Pelicula(1, "Barco Fantasma", "Un barco sin tripulacion");
+    p1->agregarGenero("Accion");
+
+    accion->agregar(p1);
+    arbol.insertar(p1);
+
+    cout << "\nIngrese una palabra para buscar en titulo o sinopsis: ";
+    string consulta;
+    cin >> consulta;
+    arbol.buscar(consulta);
+
 
     return 0;
 }
