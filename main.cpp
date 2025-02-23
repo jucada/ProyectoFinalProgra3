@@ -103,6 +103,10 @@ public:
         }
         return total;
     }
+
+    string getNombre() const {
+        return nombre;
+    }
 };
 
 
@@ -180,22 +184,56 @@ public:
     }
 };
 
+void buscarGenero(const vector<Genero*>&generos, const string& nom) {
+    bool exists = false;
+    for (const auto& genero : generos) {
+        if (genero->getNombre() == nom) {
+            exists = true;
+            genero->mostrar();
+            break;
+        }
+    }
+}
+
 
 int main() {
     BusquedaArbol arbol;
+    vector<Genero*> generos;
     Genero* accion = new Genero("Accion");
+    Genero* terror = new Genero("Terror");
 
     Pelicula* p1 = new Pelicula(1, "Barco Fantasma", "Un barco sin tripulacion");
-    p1->agregarGenero("Accion");
+    Pelicula* p2 = new Pelicula(2, "El Exorcista", "Una historia de posesion demoniaca");
 
     accion->agregar(p1);
+    terror->agregar(p2);
+
     arbol.insertar(p1);
+    arbol.insertar(p2);
 
-    cout << "\nIngrese una palabra para buscar en titulo o sinopsis: ";
-    string consulta;
-    cin >> consulta;
-    arbol.buscar(consulta);
+    generos.push_back(accion);
+    generos.push_back(terror);
 
+    int opcion;
+    cout << "\nSeleccione una opcion de busqueda:" << endl;
+    cout << "1 - Buscar por palabra en titulo o sinopsis" << endl;
+    cout << "2 - Buscar por genero" << endl;
+    cin >> opcion;
+    cin.ignore();
+
+    if (opcion == 1) {
+        cout << "\nIngrese una palabra para buscar en titulo o sinopsis: ";
+        string consulta;
+        getline(cin, consulta);
+        arbol.buscar(consulta);
+    } else if (opcion == 2) {
+        cout << "\nIngrese el genero a buscar: ";
+        string genero;
+        getline(cin, genero);
+        buscarGenero(generos, genero);
+    } else {
+        cout << "Opcion no valida." << endl;
+    }
 
     return 0;
 }
