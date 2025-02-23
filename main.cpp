@@ -5,6 +5,35 @@
 
 using namespace std;
 
+class Singleton {
+private:
+    static Singleton* instance;
+    string usuario;
+    string password;
+    Singleton() {
+        usuario = "user";
+        password = "user";
+    }
+
+public:
+    static Singleton* getInstance() {
+        if (!instance) {
+            instance = new Singleton();
+        }
+        return instance;
+    }
+
+    bool InicioSeison() {
+        string user, cont;
+        cout << "Inicio seison" << endl;
+        cout << "Usuario: " << endl;
+        cin >> user;
+        cout << "Password: " << endl;
+        cin >> cont;
+        return (user == usuario && password == password);
+    }
+};
+
 
 class Componente {
 public:
@@ -195,8 +224,14 @@ void buscarGenero(const vector<Genero*>&generos, const string& nom) {
     }
 }
 
+Singleton* Singleton::instance = nullptr;
 
 int main() {
+    Singleton* sesion = Singleton::getInstance();
+    while (!sesion->InicioSeison()) {
+        cout<<"Usario o password incorrecto. Intente de nuevo"<<endl;
+    }
+
     BusquedaArbol arbol;
     vector<Genero*> generos;
     Genero* accion = new Genero("Accion");
