@@ -1,7 +1,7 @@
 # Programación III: Proyecto Final (2025-0)
 
 ## Integrantes
-- Ian Rodriguez Peres
+- Ian Rodriguez Santayana
 - Juan Carlos Paredes Alva
 
 # Plataforma de Streaming
