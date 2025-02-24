@@ -34,41 +34,34 @@ map<string, Pelicula> leerCSV(const string& archivoEntrada) {
         string primerCampo;
         getline(ss, primerCampo, ',');
 
-        // Si encontramos un ID válido, significa que es una nueva película
         if (esIDValido(primerCampo)) {
-            // Guardamos la película anterior si existe
             if (!id.empty()) {
                 peliculas[id] = Pelicula(id, titulo, sinopsis);
             }
 
-            // Iniciamos una nueva película
             id = primerCampo;
             getline(ss, titulo, ',');
 
-            // Iniciar sinopsis vacía, se llenará en el siguiente paso
             getline(ss, sinopsis);;
             leyendoSinopsis = true;
         } else if (leyendoSinopsis) {
-            // Si NO es un ID, entonces es parte de la sinopsis o datos adicionales
             sinopsis += (sinopsis.empty() ? "" : "\n") + linea;
         }
 
-        // Detectar si hemos llegado al final de la sinopsis y hay más datos en la línea
         if (sinopsis.find(".\",") != string::npos) {
             size_t pos = sinopsis.find(".\",");
-            sinopsis = sinopsis.substr(0, pos);  // Tomar solo la parte de la sinopsis
+            sinopsis = sinopsis.substr(0, pos);
 
-            // Leer los demás campos después de la sinopsis
-            ss.ignore(); // Ignorar la coma después de las comillas
+            ss.ignore();
             getline(ss, tags, ',');
             getline(ss, split, ',');
             getline(ss, synopsis_source, ',');
 
-            leyendoSinopsis = false;  // Terminamos la sinopsis
+            leyendoSinopsis = false;
         }
     }
 
-    // Guardar la última película si existe
+
     if (!id.empty()) {
         peliculas[id] = Pelicula(id, titulo, sinopsis);
     }
@@ -77,7 +70,6 @@ map<string, Pelicula> leerCSV(const string& archivoEntrada) {
     return peliculas;
 }
 
-// Función para imprimir las películas almacenadas
 void imprimirPeliculas(const map<string, Pelicula>& peliculas) {
     for (const auto& [id, pelicula] : peliculas) {
         pelicula.mostrar();
