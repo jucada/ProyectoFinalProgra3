@@ -2,6 +2,11 @@
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <cctype>
+
 
 using namespace std;
 
@@ -23,14 +28,14 @@ public:
         return instance;
     }
 
-    bool InicioSeison() {
+    bool InicioSesion() {
         string user, cont;
-        cout << "Inicio seison" << endl;
+        cout << "Inicio sesion" << endl;
         cout << "Usuario: " << endl;
         cin >> user;
         cout << "Password: " << endl;
         cin >> cont;
-        return (user == usuario && password == password);
+        return (user == usuario && cont == password);
     }
 };
 
@@ -80,6 +85,7 @@ public:
     string getTitulo() const {
         return titulo;
     }
+
 
     void agregarGenero(string genero) {
         generos.insert(genero);
@@ -224,30 +230,109 @@ void buscarGenero(const vector<Genero*>&generos, const string& nom) {
     }
 }
 
+
+vector<string> splitCSV(const string& line) {
+    vector<string> fields;
+    bool inQuotes = false;
+    string field;
+    for (size_t i = 0; i < line.size(); i++) {
+        char c = line[i];
+        if (c == '"') {
+            inQuotes = !inQuotes;
+        } else if (c == ',' && !inQuotes) {
+            fields.push_back(field);
+            field.clear();
+        } else {
+            field.push_back(c);
+        }
+    }
+    fields.push_back(field);
+    return fields;
+}
+
+vector<string> splitTags(const string& tagsStr) {
+    vector<string> tags;
+    stringstream ss(tagsStr);
+    string tag;
+    while(getline(ss, tag, ',')) {
+        tags.push_back(tag);
+    }
+    return tags;
+}
+
+// Función para cargar películas desde el archivo CSV.
+// Se asume que el archivo tiene la siguiente estructura en el encabezado:
+// imdb_id,title,plot_synopsis,tags,split,synopsis_source
+void cargarPeliculasDesdeCSV(const string& nombreArchivo, vector<Pelicula*>& peliculas) {
+    ifstream archivo(nombreArchivo);
+    if (!archivo.is_open()) {
+        cout << "No se pudo abrir el archivo: " << nombreArchivo << endl;
+        return;
+    }
+
+    string linea;
+    bool primeraLinea = true;
+    while(getline(archivo, linea)) {
+        if (primeraLinea) {
+            primeraLinea = false;
+            continue;
+        }
+
+        vector<string> campos = splitCSV(linea);
+        // Verificar que se hayan leído al menos 6 campos.
+        if (campos.size() < 6) {
+            cout << "Línea con formato incorrecto: " << linea << endl;
+            continue;
+        }
+
+        // Convertir el imdb_id en un entero (ignorando el prefijo "tt" si existe).
+        int id;
+        if (campos[0].substr(0, 2) == "tt") {
+            id = stoi(campos[0].substr(2));
+        } else {
+            id = stoi(campos[0]);
+        }
+
+        string titulo = campos[1];
+        string sinopsis = campos[2];
+        string tagsStr = campos[3]; // Ejemplo: "cult, horror, gothic, murder, atmospheric"
+        // Los campos 'split' y 'synopsis_source' se pueden ignorar o utilizar según tus necesidades.
+
+        // Crear la película con id, título y sinopsis.
+        Pelicula* nuevaPelicula = new Pelicula(id, titulo, sinopsis);
+
+        // Separar y agregar cada tag como género.
+        vector<string> tags = splitTags(tagsStr);
+        for (const auto& tag : tags) {
+            nuevaPelicula->agregarGenero(tag);
+        }
+
+        peliculas.push_back(nuevaPelicula);
+    }
+
+    archivo.close();
+}
+
 Singleton* Singleton::instance = nullptr;
 
 int main() {
     Singleton* sesion = Singleton::getInstance();
-    while (!sesion->InicioSeison()) {
+    while (!sesion->InicioSesion()) {
         cout<<"Usario o password incorrecto. Intente de nuevo"<<endl;
     }
 
-    BusquedaArbol arbol;
+
+
+    // Vector para almacenar las películas cargadas desde el CSV.
+    vector<Pelicula*> peliculas;
+    cargarPeliculasDesdeCSV("mpst_full_data.csv", peliculas);
     vector<Genero*> generos;
-    Genero* accion = new Genero("Accion");
-    Genero* terror = new Genero("Terror");
+    BusquedaArbol arbol;
+    for (auto pelicula : peliculas) {
+        arbol.insertar(pelicula);
+        cout << pelicula->getTitulo() << endl;
+    }
 
-    Pelicula* p1 = new Pelicula(1, "Barco Fantasma", "Un barco sin tripulacion");
-    Pelicula* p2 = new Pelicula(2, "El Exorcista", "Una historia de posesion demoniaca");
-
-    accion->agregar(p1);
-    terror->agregar(p2);
-
-    arbol.insertar(p1);
-    arbol.insertar(p2);
-
-    generos.push_back(accion);
-    generos.push_back(terror);
 
     int opcion;
     cout << "\nSeleccione una opcion de busqueda:" << endl;
