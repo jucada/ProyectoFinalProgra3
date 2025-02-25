@@ -2,7 +2,9 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <map>
 #include "clases.h"
+#include "procesamiento.h"
 
 using namespace std;
 
@@ -17,20 +19,15 @@ int main() {
 
     BusquedaArbol arbol;
     vector<Genero*> generos;
-    Genero* accion = new Genero("Accion");
-    Genero* terror = new Genero("Terror");
 
-    Pelicula* p1 = new Pelicula("1", "Barco Fantasma", "Un barco sin tripulacion");
-    Pelicula* p2 = new Pelicula("2", "El Exorcista", "Una historia de posesion demoniaca");
 
-    accion->agregar(p1);
-    terror->agregar(p2);
+    string archivoCSV = "mpst_full_data.csv";
+    map<string, Pelicula*> peliculas = leerCSV("mpst_full_data.csv");
 
-    arbol.insertar(p1);
-    arbol.insertar(p2);
+    for (const auto& [id, pelicula] : peliculas) {
+        arbol.insertar(pelicula);
+    }
 
-    generos.push_back(accion);
-    generos.push_back(terror);
 
     int opcion;
     cout << "\nSeleccione una opcion de busqueda:" << endl;

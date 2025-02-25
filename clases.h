@@ -71,7 +71,6 @@ public:
 
     void mostrar() const override {
         cout << "Titulo: " << titulo << endl;
-        cout << "Sinopsis: " << sinopsis << endl;
         cout << "----------------------------------------------" << endl;
     }
 

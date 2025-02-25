@@ -1,7 +1,11 @@
+//
+// Created by dalev on 24/02/2025.
+//
+
+#ifndef PROCESAMIENTO_H
+#define PROCESAMIENTO_H
+
 #include <iostream>
-#include <vector>
-#include <algorithm>
-#include <set>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -16,8 +20,8 @@ bool esIDValido(const string& texto) {
     return regex_match(texto, regex("^tt\\d{7}$"));
 }
 
-map<string, Pelicula> leerCSV(const string& archivoEntrada) {
-    map<string, Pelicula> peliculas;
+map<string, Pelicula*> leerCSV(const string& archivoEntrada) {
+    map<string, Pelicula*> peliculas;
     ifstream archivo(archivoEntrada);
 
     if (!archivo.is_open()) {
@@ -36,7 +40,7 @@ map<string, Pelicula> leerCSV(const string& archivoEntrada) {
 
         if (esIDValido(primerCampo)) {
             if (!id.empty()) {
-                peliculas[id] = Pelicula(id, titulo, sinopsis);
+                peliculas[id] = new Pelicula(id, titulo, sinopsis);
             }
 
             id = primerCampo;
@@ -63,7 +67,7 @@ map<string, Pelicula> leerCSV(const string& archivoEntrada) {
 
 
     if (!id.empty()) {
-        peliculas[id] = Pelicula(id, titulo, sinopsis);
+        peliculas[id] = new Pelicula(id, titulo, sinopsis);
     }
 
     archivo.close();
@@ -78,11 +82,5 @@ void imprimirPeliculas(const map<string, Pelicula>& peliculas) {
 
 
 
-int main() {
-    string archivoCSV = "mpst_full_data.csv";
-    map<string, Pelicula> peliculas = leerCSV("mpst_full_data.csv");
 
-    // Mostrar películas almacenadas
-    cout << peliculas.size();
-    return 0;
-}
+#endif //PROCESAMIENTO_H
