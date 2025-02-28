@@ -10,6 +10,10 @@
 
 Este proyecto consiste en el desarrollo de una plataforma de streaming que permite la búsqueda y visualización de sinopsis de películas. Este proyecto utiliza un árbol organizado por el nombre de las películas extraída de una base de datos .CSV. Este programa permite tener 2 usuarios por defecto con nombre y contraseña: user1 para el usuario 1 y user2 para el otro. Cada usuario tiene la capacidad de agregar las películas que le interese en una liste de ver más tarde a través de una interfaz en la terminal.
 
+## Video explicativo
+
+https://youtu.be/xSRi8ItPt6k
+
 ## Características
 
 - **Carga de base de datos**: El programa lee y procesa un archivo CSV que contiene información sobre películas. Esencialmente el titulo, los géneros y el id de estos
@@ -19,6 +23,20 @@ Este proyecto consiste en el desarrollo de una plataforma de streaming que permi
 
 - **Ver Mas Tarde**:
   Cada usuario va a contar con su lista propia para agregar películas en su lista de Ver mas tarde a través de la interfaz después de buscar la película en el árbol. En caso el usuario la desee agregar se incluirá en un vector de Películas la cual es la lista personal de cada usuario.
+
+
+## Procesamiento
+
+Para el procesamiento del archivo .csv se usaron hilos. A continuación, se muestra una tabla de tiempos e hilos utilizados.
+- Datos procesados: 14828
+
+| Hilos | Tiempo (ms) |
+|-------|------------|
+| 1     | 16428      |
+| 2     | 12331      |
+| 4     | 9397       |
+| 8     | 5246       |
+
   
 
 ## Tecnologías y herramientas utilizadas
