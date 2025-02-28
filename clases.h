@@ -1,7 +1,3 @@
-//
-// Created by dalev on 24/02/2025.
-//
-
 #ifndef CLASES_H
 #define CLASES_H
 
@@ -12,8 +8,43 @@
 #include <sstream>
 #include <string>
 #include <cctype>
+#include <map>
+#include <fstream>
 
 using namespace std;
+
+class Observador {
+public:
+    virtual void actualizar(const string& mensaje) = 0;
+};
+
+class Sujeto {
+protected:
+    vector<Observador*> observadores;
+public:
+    void agregarObservador(Observador* obs) {
+        observadores.push_back(obs);
+    }
+    void removerObservador(Observador* obs) {
+        observadores.erase(remove(observadores.begin(), observadores.end(), obs), observadores.end());
+    }
+    void notificarObservadores(const string& mensaje) {
+        for (Observador* obs : observadores) {
+            obs->actualizar(mensaje);
+        }
+    }
+};
+
+class UsuarioObservador : public Observador {
+private:
+    string nombre;
+public:
+    UsuarioObservador(const string& nombre) : nombre(nombre) {}
+    void actualizar(const string& mensaje) override {
+        cout << "Notificacion para " << nombre << ": " << mensaje << endl;
+    }
+};
+
 
 class Componente {
 public:
@@ -78,9 +109,8 @@ public:
         return generos.find(genero) != generos.end();
     }
 
-    void agregar(Componente *pelicula) override{};
+    void agregar(Componente *pelicula) override { }
 };
-
 
 class Genero : public Componente {
 private:
@@ -97,7 +127,7 @@ public:
         if (peli) {
             peliculas.push_back(peli);
         } else {
-            cout<<"Error no es pelicula"<<endl;
+            cout << "Error no es pelicula" << endl;
         }
     }
 
@@ -132,11 +162,11 @@ public:
 };
 
 
-class Singleton {
+class Singleton : public Sujeto {
 private:
     static Singleton* instance;
     map<string, string> usuarios;
-    map<string,set<Pelicula*>> listaVerMasTarde;
+    map<string, set<Pelicula*>> listaVerMasTarde;
     string usuarioActual;
 
     Singleton() {
@@ -170,19 +200,17 @@ public:
     }
 
     void cerrarSesion() {
-        cout<< "Cerrando sesion."<<endl;
+        cout << "Cerrando sesion." << endl;
         usuarioActual.clear();
     }
 
     void guardarListaVerMasTarde() {
         if (usuarioActual.empty()) return;
-
         ofstream archivo(usuarioActual + ".txt");
         if (!archivo) {
             cout << "Error al guardar la lista de 'Ver más tarde'." << endl;
             return;
         }
-
         for (const auto& pelicula : listaVerMasTarde[usuarioActual]) {
             archivo << pelicula->getID() << endl;
         }
@@ -191,12 +219,10 @@ public:
 
     void cargarListaVerMasTarde(const map<string, Pelicula*>& peliculasDisponibles) {
         if (usuarioActual.empty()) return;
-
         ifstream archivo(usuarioActual + ".txt");
         if (!archivo) {
             return;
         }
-
         string titulo;
         while (getline(archivo, titulo)) {
             auto it = peliculasDisponibles.find(titulo);
@@ -207,14 +233,13 @@ public:
         archivo.close();
     }
 
-
     void agregarVerMasTarde(Pelicula* pelicula) {
         if (listaVerMasTarde[usuarioActual].insert(pelicula).second) {
-            cout<<"Pelicula agregada a ver mas tarde: "<<pelicula->getTitulo()<<endl;
+            cout << "Pelicula agregada a ver mas tarde: " << pelicula->getTitulo() << endl;
             guardarListaVerMasTarde();
-        }
-        else {
-            cout<<"Esta pelicula ya esta en tu lista"<<endl;
+            notificarObservadores("Se agregó la película '" + pelicula->getTitulo() + "' a la lista de 'Ver mas tarde' para el usuario " + usuarioActual);
+        } else {
+            cout << "Esta pelicula ya esta en tu lista" << endl;
         }
     }
 
@@ -224,7 +249,6 @@ public:
             cout << "No tienes peliculas en tu lista de Ver mas tarde.\n";
             return;
         }
-
         cout << "\nTu lista de Ver mas tarde:\n";
         int i = 1;
         for (const auto& pelicula : listaVerMasTarde[usuarioActual]) {
@@ -264,23 +288,18 @@ private:
         if (nodo == nullptr) {
             return;
         }
-
         int prioridad = 0;
         int vecesTitulo = 0;
         int vecesSinopsis = nodo->pelicula->contarPalabra(palabra);
-
-        int pos = nodo->pelicula->getTitulo().find(palabra,0);
-        while (pos != -1) {
+        size_t pos = nodo->pelicula->getTitulo().find(palabra, 0);
+        while (pos != string::npos) {
             vecesTitulo++;
-            pos = nodo->pelicula->getTitulo().find(palabra,pos+palabra.length());
+            pos = nodo->pelicula->getTitulo().find(palabra, pos + palabra.length());
         }
-
         prioridad = (vecesTitulo * 10) + vecesSinopsis;
-
         if (prioridad > 0) {
-            resultados.push_back({prioridad,nodo->pelicula});
+            resultados.push_back({prioridad, nodo->pelicula});
         }
-
         buscarNodo(nodo->izq, palabra, resultados);
         buscarNodo(nodo->der, palabra, resultados);
     }
@@ -293,95 +312,76 @@ public:
     }
 
     void buscar(string palabra) {
-    Singleton* sesion = Singleton::getInstance();
-    vector<pair<int, Pelicula*>> resultados;
-    buscarNodo(raiz, palabra, resultados);
-
-    sort(resultados.begin(), resultados.end(), [](const pair<int, Pelicula*>& a, const pair<int, Pelicula*>& b) {
-        return a.first > b.first;
-    });
-
-    cout << "Resultados de busqueda:" << endl;
-
-    if (resultados.empty()) {
-        cout << "No se encontraron resultados para: " << palabra << endl;
-        return;
-    }
-
-    int totalResultados = resultados.size();
-    int pagina = 0;
-
-    while (pagina * 5 < totalResultados) {
-        cout << "\nPagina " << (pagina + 1) << " de " << ((totalResultados + 4) / 5) << ":\n";
-
-        for (int i = pagina * 5; i < min((pagina + 1) * 5, totalResultados); i++) {
-            cout << (i % 5) + 1 << ". "; // Numeración de 1 a 5 en la página actual
-            resultados[i].second->mostrar();
+        Singleton* sesion = Singleton::getInstance();
+        vector<pair<int, Pelicula*>> resultados;
+        buscarNodo(raiz, palabra, resultados);
+        sort(resultados.begin(), resultados.end(), [](const pair<int, Pelicula*>& a, const pair<int, Pelicula*>& b) {
+            return a.first > b.first;
+        });
+        cout << "Resultados de busqueda:" << endl;
+        if (resultados.empty()) {
+            cout << "No se encontraron resultados para: " << palabra << endl;
+            return;
         }
-
-        while (true) {
-            cout << "Ingrese el numero (1-5) para agregar a 'Ver mas tarde', 'a' para avanzar o 's' para salir: ";
-            string opcion;
-            getline(cin, opcion);
-
-            if (opcion == "a") {
-                break;
-            } else if (opcion == "s") {
-                return;
-            } else if (opcion >= "1" && opcion <= "5") {
-                int index = stoi(opcion) - 1;
-                int actualIndex = pagina * 5 + index;
-
-                if (actualIndex < totalResultados) {
-                    sesion->agregarVerMasTarde(resultados[actualIndex].second);
-                } else {
-                    cout << "Numero invalido.\n";
-                }
-            } else {
-                cout << "Opcion no valida.\n";
+        int totalResultados = resultados.size();
+        int pagina = 0;
+        while (pagina * 5 < totalResultados) {
+            cout << "\nPagina " << (pagina + 1) << " de " << ((totalResultados + 4) / 5) << ":\n";
+            for (int i = pagina * 5; i < min((pagina + 1) * 5, totalResultados); i++) {
+                cout << (i % 5) + 1 << ". "; // Numeración de 1 a 5 en la página actual
+                resultados[i].second->mostrar();
             }
-        }
-
-        pagina++;
+            while (true) {
+                cout << "Ingrese el numero (1-5) para agregar a 'Ver mas tarde', 'a' para avanzar o 's' para salir: ";
+                string opcion;
+                getline(cin, opcion);
+                if (opcion == "a") {
+                    break;
+                } else if (opcion == "s") {
+                    return;
+                } else if (opcion >= "1" && opcion <= "5") {
+                    int index = stoi(opcion) - 1;
+                    int actualIndex = pagina * 5 + index;
+                    if (actualIndex < totalResultados) {
+                        sesion->agregarVerMasTarde(resultados[actualIndex].second);
+                    } else {
+                        cout << "Numero invalido.\n";
+                    }
+                } else {
+                    cout << "Opcion no valida.\n";
+                }
+            }
+            pagina++;
         }
     }
-
 };
 
 void buscarGenero(const map<string, Pelicula*>& peliculas, const string& genero) {
     Singleton* sesion = Singleton::getInstance();
     vector<Pelicula*> resultados;
-
     // Buscar películas que contengan el género
     for (const auto& [id, pelicula] : peliculas) {
         if (pelicula->tieneGenero(genero)) {
             resultados.push_back(pelicula);
         }
     }
-
     cout << "Resultados de busqueda:" << endl;
-
     if (resultados.empty()) {
         cout << "No se encontraron películas con el género '" << genero << "'.\n";
         return;
     }
-
     int totalResultados = resultados.size();
     int pagina = 0;
-
     while (pagina * 5 < totalResultados) {
         cout << "\nPeliculas del genero '" << genero << "' (Pagina " << (pagina + 1) << " de " << ((totalResultados + 4) / 5) << "):\n";
-
         for (int i = pagina * 5; i < min((pagina + 1) * 5, totalResultados); i++) {
             cout << (i % 5) + 1 << ". "; // Numeración de 1 a 5 en la página actual
             resultados[i]->mostrar();
         }
-
         while (true) {
             cout << "Ingrese el numero (1-5) para agregar a 'Ver mas tarde', 'a' para avanzar o 's' para salir: ";
             string opcion;
             getline(cin, opcion);
-
             if (opcion == "a") {
                 break;
             } else if (opcion == "s") {
@@ -389,7 +389,6 @@ void buscarGenero(const map<string, Pelicula*>& peliculas, const string& genero)
             } else if (opcion >= "1" && opcion <= "5") {
                 int index = stoi(opcion) - 1;
                 int actualIndex = pagina * 5 + index;
-
                 if (actualIndex < totalResultados) {
                     sesion->agregarVerMasTarde(resultados[actualIndex]);
                 } else {
@@ -402,7 +401,5 @@ void buscarGenero(const map<string, Pelicula*>& peliculas, const string& genero)
         pagina++;
     }
 }
-
-
 
 #endif //CLASES_H
