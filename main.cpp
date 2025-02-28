@@ -19,6 +19,8 @@ int main() {
             cout << "Usuario o password incorrecto. Intente de nuevo." << endl;
         }
 
+        cout << "Cargando datos..." << endl;
+
         BusquedaArbol arbol;
         vector<Genero*> generos;
 
@@ -32,7 +34,7 @@ int main() {
         bool sesionActiva = true; // Controla si la sesión sigue activa
 
         while (sesionActiva) { // Bucle interno para el menú del usuario logueado
-            int opcion;
+            char opcion;
             cout << "\nSeleccione una opcion de busqueda:" << endl;
             cout << "1 - Buscar por palabra en titulo o sinopsis" << endl;
             cout << "2 - Buscar por genero" << endl;
@@ -42,21 +44,21 @@ int main() {
             cin >> opcion;
             cin.ignore();
 
-            if (opcion == 1) {
+            if (opcion == '1') {
                 cout << "\nIngrese una palabra para buscar en titulo o sinopsis: ";
                 string consulta;
                 getline(cin, consulta);
                 arbol.buscar(consulta);
-            } else if (opcion == 2) {
+            } else if (opcion == '2') {
                 cout << "\nIngrese el genero a buscar: ";
                 string genero;
                 getline(cin, genero);
-                buscarGenero(generos, genero);
-            } else if (opcion == 3) {
-                sesion->mostrarVerMasTarde();
-            } else if (opcion == 4) {
+                buscarGenero(peliculas, genero);
+            } else if (opcion == '3') {
+                sesion->mostrarVerMasTarde(peliculas);
+            } else if (opcion == '4') {
                 return 0; // Cierra completamente el programa
-            } else if (opcion == 5) {
+            } else if (opcion == '5') {
                 sesion->cerrarSesion();
                 sesionActiva = false; // Salimos del bucle interno y volvemos a la pantalla de inicio de sesión
             } else {
