@@ -22,26 +22,11 @@ class Sujeto {
 protected:
     vector<Observador*> observadores;
 public:
-    void agregarObservador(Observador* obs) {
-        observadores.push_back(obs);
-    }
-    void removerObservador(Observador* obs) {
-        observadores.erase(remove(observadores.begin(), observadores.end(), obs), observadores.end());
-    }
+
     void notificarObservadores(const string& mensaje) {
         for (Observador* obs : observadores) {
             obs->actualizar(mensaje);
         }
-    }
-};
-
-class UsuarioObservador : public Observador {
-private:
-    string nombre;
-public:
-    UsuarioObservador(const string& nombre) : nombre(nombre) {}
-    void actualizar(const string& mensaje) override {
-        cout << "Notificacion para " << nombre << ": " << mensaje << endl;
     }
 };
 
