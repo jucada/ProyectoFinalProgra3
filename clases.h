@@ -64,6 +64,12 @@ public:
         cout << "\n----------------------------------------------" << endl;
     }
 
+    void mostrarSinopsis() {
+        cout << "Titulo: " << titulo << endl;
+        cout << "Sinopsis: " << sinopsis << endl;
+        cout << "\n----------------------------------------------" << endl;
+    }
+
     bool contienePalabra(const string& palabra) const override {
         return (titulo.find(palabra) != string::npos || sinopsis.find(palabra) != string::npos);
     }
@@ -152,6 +158,7 @@ private:
     static Singleton* instance;
     map<string, string> usuarios;
     map<string, set<Pelicula*>> listaVerMasTarde;
+    map<string, set<Pelicula*>> listaLikes;
     string usuarioActual;
 
     Singleton() {
@@ -241,6 +248,60 @@ public:
             cout << i++ << ". " << pelicula->getTitulo() << endl;
         }
     }
+
+    void guardarLikes() {
+        if (usuarioActual.empty()) return;
+        ofstream archivo(usuarioActual + "_likes.txt");
+        if (!archivo) {
+            cout << "Error al guardar la lista de 'Likes'." << endl;
+            return;
+        }
+        for (const auto& pelicula : listaLikes[usuarioActual]) {
+            archivo << pelicula->getID() << endl;
+        }
+        archivo.close();
+    }
+
+    void cargarLikes(const map<string, Pelicula*>& peliculasDisponibles) {
+        if (usuarioActual.empty()) return;
+        if (!listaLikes[usuarioActual].empty()) return;
+        ifstream archivo(usuarioActual + "_likes.txt");
+        if (!archivo) {
+            return;
+        }
+        string id;
+        while (getline(archivo, id)) {
+            auto it = peliculasDisponibles.find(id);
+            if (it != peliculasDisponibles.end()) {
+                listaLikes[usuarioActual].insert(it->second);
+            }
+        }
+        archivo.close();
+    }
+
+    void agregarLike(Pelicula* pelicula) {
+        if (listaLikes[usuarioActual].insert(pelicula).second) {
+            cout << "Película agregada a Likes: " << pelicula->getTitulo() << endl;
+            guardarLikes();
+            notificarObservadores("Se agregó la película '" + pelicula->getTitulo() + "' a la lista de 'Likes' para el usuario " + usuarioActual);
+        } else {
+            cout << "Esta película ya está en tu lista de Likes." << endl;
+        }
+    }
+
+    void mostrarLikes(const map<string, Pelicula*>& peliculasDisponibles) {
+        cargarLikes(peliculasDisponibles);
+        if (listaLikes[usuarioActual].empty()) {
+            cout << "No tienes películas en tu lista de Likes.\n";
+            return;
+        }
+        cout << "\nTu lista de Likes:\n";
+        int i = 1;
+        for (const auto& pelicula : listaLikes[usuarioActual]) {
+            cout << i++ << ". " << pelicula->getTitulo() << endl;
+        }
+    }
+
 };
 
 struct Nodo {
@@ -318,23 +379,33 @@ public:
                 resultados[i].second->mostrar();
             }
             while (true) {
-                cout << "Ingrese el numero (1-5) para agregar a 'Ver mas tarde', 'a' para avanzar o 's' para salir: ";
+                cout << "Ingrese el número (1-5) para seleccionar una pelicula, 'a' para avanzar o 's' para salir: ";
                 string opcion;
                 getline(cin, opcion);
                 if (opcion == "a") {
-                    break;
+                    break; // Avanzamos a la siguiente página
                 } else if (opcion == "s") {
-                    return;
+                    return; // Salimos del método de búsqueda
                 } else if (opcion >= "1" && opcion <= "5") {
                     int index = stoi(opcion) - 1;
                     int actualIndex = pagina * 5 + index;
                     if (actualIndex < totalResultados) {
-                        sesion->agregarVerMasTarde(resultados[actualIndex].second);
+                        resultados[actualIndex].second->mostrarSinopsis();
+                        cout << "Presione 'v' para agregar a 'Ver mas tarde', 'l' para dar Like o 's' para Salir: ";
+                        string accion;
+                        getline(cin, accion);
+                        if (accion == "v") {
+                            sesion->agregarVerMasTarde(resultados[actualIndex].second);
+                        } else if (accion == "l") {
+                            sesion->agregarLike(resultados[actualIndex].second);
+                        } else {
+                            cout << "Accion no válida.\n";
+                        }
                     } else {
-                        cout << "Numero invalido.\n";
+                        cout << "Numero inválido.\n";
                     }
                 } else {
-                    cout << "Opcion no valida.\n";
+                    cout << "Opcion no válida.\n";
                 }
             }
             pagina++;

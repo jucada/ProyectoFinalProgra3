@@ -39,8 +39,9 @@ int main() {
             cout << "1 - Buscar por palabra en titulo o sinopsis" << endl;
             cout << "2 - Buscar por genero" << endl;
             cout << "3 - Ver lista de 'Ver mas tarde'" << endl;
-            cout << "4 - Salir" << endl;
-            cout << "5 - Cerrar sesion" << endl;
+            cout << "4 - Ver lista de 'Likes'" << endl;
+            cout << "5 - Salir" << endl;
+            cout << "6 - Cerrar sesion" << endl;
             cin >> opcion;
             cin.ignore();
 
@@ -56,9 +57,12 @@ int main() {
                 buscarGenero(peliculas, genero);
             } else if (opcion == '3') {
                 sesion->mostrarVerMasTarde(peliculas);
-            } else if (opcion == '4') {
+            }else if (opcion == '4') {
+                sesion->mostrarLikes(peliculas);
+            }
+            else if (opcion == '5') {
                 return 0; // Cierra completamente el programa
-            } else if (opcion == '5') {
+            } else if (opcion == '6') {
                 sesion->cerrarSesion();
                 sesionActiva = false; // Salimos del bucle interno y volvemos a la pantalla de inicio de sesión
             } else {

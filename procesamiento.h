@@ -16,7 +16,7 @@ using namespace std;
 
 mutex mtx;
 
-int numHilos = 4;
+int numHilos = 8;
 
 bool esIDValido(const string& texto) {
     return regex_match(texto, regex("^tt\\d{7}$"));
