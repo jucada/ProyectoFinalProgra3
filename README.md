@@ -11,8 +11,7 @@
 Este proyecto consiste en el desarrollo de una plataforma de streaming que permite la búsqueda y visualización de sinopsis de películas. Este proyecto utiliza un árbol organizado por el nombre de las películas extraída de una base de datos .CSV. Este programa permite tener 2 usuarios por defecto con nombre y contraseña: user1 para el usuario 1 y user2 para el otro. Cada usuario tiene la capacidad de agregar las películas que le interese en una liste de ver más tarde a través de una interfaz en la terminal.
 
 ## Video explicativo
-
-https://youtu.be/xSRi8ItPt6k
+https://youtu.be/X7fNkJnDrEc
 
 ## Características
 
