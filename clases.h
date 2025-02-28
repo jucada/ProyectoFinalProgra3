@@ -219,13 +219,14 @@ public:
 
     void cargarListaVerMasTarde(const map<string, Pelicula*>& peliculasDisponibles) {
         if (usuarioActual.empty()) return;
+        if (!listaVerMasTarde[usuarioActual].empty()) return;
         ifstream archivo(usuarioActual + ".txt");
         if (!archivo) {
             return;
         }
-        string titulo;
-        while (getline(archivo, titulo)) {
-            auto it = peliculasDisponibles.find(titulo);
+        string id;
+        while (getline(archivo, id)) {
+            auto it = peliculasDisponibles.find(id);
             if (it != peliculasDisponibles.end()) {
                 listaVerMasTarde[usuarioActual].insert(it->second);
             }
