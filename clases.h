@@ -379,7 +379,7 @@ public:
                 resultados[i].second->mostrar();
             }
             while (true) {
-                cout << "Ingrese el número (1-5) para seleccionar una pelicula, 'a' para avanzar o 's' para salir: ";
+                cout << "Ingrese el numero (1-5) para seleccionar una pelicula, 'a' para avanzar o 's' para salir: ";
                 string opcion;
                 getline(cin, opcion);
                 if (opcion == "a") {
